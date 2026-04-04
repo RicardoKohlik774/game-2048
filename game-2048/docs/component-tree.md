@@ -1,4 +1,4 @@
-# Strom komponent – 2048
+# Strom komponent – game 2048
 
 ## Struktura
 

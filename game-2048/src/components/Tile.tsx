@@ -1,5 +1,4 @@
-// src/components/Tile.tsx
-// Jedna dlaždice – hodnota, barva dle hodnoty, animace spawn/merge
+
 import type { Tile } from "../types";
 
 interface TileProps {

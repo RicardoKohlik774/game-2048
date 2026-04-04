@@ -1,5 +1,4 @@
-// src/components/ScoreBoard.tsx
-// Zobrazuje aktuální skóre a rekord
+
 interface ScoreBoardProps {
   score: number;
   bestScore: number;

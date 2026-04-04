@@ -1,5 +1,4 @@
-// src/components/GameBoard.tsx
-// Herní pole 4×4 – renderuje všechny dlaždice
+
 import type { Tile } from "../types";
 
 interface GameBoardProps {

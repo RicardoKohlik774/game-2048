@@ -1,5 +1,4 @@
-// src/components/GameOverModal.tsx
-// Modální okno při výhře nebo prohře
+
 import type { GameStatus } from "../types";
 
 interface GameOverModalProps {

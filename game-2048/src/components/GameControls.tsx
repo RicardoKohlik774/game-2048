@@ -1,5 +1,4 @@
-// src/components/GameControls.tsx
-// Tlačítko "Nová hra"
+
 interface GameControlsProps {
   onNewGame: () => void;
 }

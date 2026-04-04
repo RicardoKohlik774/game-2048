@@ -1,6 +1,5 @@
-// src/hooks/useGameLogic.ts
-// TODO: pohyb dlaždic, merge, spawn nové dlaždice, detekce konce hry
-import type { GameState, Direction } from "../types";
+
+//TODO: pohyb dlaždic, merge, spawn novy dlazdice, detekce konce hry...
 
 export function useGameLogic() {
   // TODO
