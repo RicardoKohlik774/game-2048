@@ -46,23 +46,27 @@ function moveTiles(tiles: Tile[], direction: Direction): { tiles: Tile[], score:
 
   if (direction === 'left' || direction === 'right') {
     for (let r = 0; r < 4; r++) {
-      let row = direction === 'left' ? grid[r] : [...grid[r]].reverse()
-      const { row: slid, score } = slideRow(row)
+      const row = grid[r]
+      const filtered = (direction === 'left' ? row : [...row].reverse()).filter(Boolean) as Tile[]
+      const { row: slid, score } = slideRow(filtered)
       totalScore += score
-      if (direction === 'right') slid.reverse()
-      slid.forEach((t, c) => {
-        newTiles.push({ ...t, row: r, col: direction === 'left' ? c : 3 - c })
+      // Doplň prázdná místa
+      while (slid.length < 4) slid.push(null as any)
+      const final = direction === 'left' ? slid : [...slid].reverse()
+      final.forEach((t, c) => {
+        if (t) newTiles.push({ ...t, row: r, col: c })
       })
     }
   } else {
     for (let c = 0; c < 4; c++) {
-      let col = grid.map(r => r[c])
-      if (direction === 'down') col = [...col].reverse()
-      const { row: slid, score } = slideRow(col)
+      const col = grid.map(r => r[c])
+      const filtered = (direction === 'up' ? col : [...col].reverse()).filter(Boolean) as Tile[]
+      const { row: slid, score } = slideRow(filtered)
       totalScore += score
-      if (direction === 'down') slid.reverse()
-      slid.forEach((t, r) => {
-        newTiles.push({ ...t, row: direction === 'up' ? r : 3 - r, col: c })
+      while (slid.length < 4) slid.push(null as any)
+      const final = direction === 'up' ? slid : [...slid].reverse()
+      final.forEach((t, r) => {
+        if (t) newTiles.push({ ...t, row: r, col: c })
       })
     }
   }
