@@ -1,5 +1,4 @@
 // src/components/GameOverModal.tsx
-// Modální okno při výhře nebo prohře
 import type { GameStatus } from "../types";
 
 interface GameOverModalProps {
@@ -10,7 +9,7 @@ interface GameOverModalProps {
 
 export default function GameOverModal({ status, score, onRestart }: GameOverModalProps) {
   return (
-    <div className="modal-overlay">
+    <div className={`modal-overlay ${status}`}>
       <div className="modal">
         <h2>{status === "won" ? "🎉 Vyhrál jsi!" : "💀 Konec hry"}</h2>
         <p>Skóre: {score}</p>
