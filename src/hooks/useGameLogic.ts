@@ -1,6 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
 import type { GameState, Direction, Tile } from '../types'
 
+const SAVE_KEY = '2048-state'
+const BEST_KEY = '2048-best'
+
 let nextId = 1
 
 function createTile(row: number, col: number, value: number): Tile {
@@ -50,12 +53,9 @@ function moveTiles(tiles: Tile[], direction: Direction): { tiles: Tile[], score:
       const filtered = (direction === 'left' ? row : [...row].reverse()).filter(Boolean) as Tile[]
       const { row: slid, score } = slideRow(filtered)
       totalScore += score
-      // Doplň prázdná místa
       while (slid.length < 4) slid.push(null as any)
       const final = direction === 'left' ? slid : [...slid].reverse()
-      final.forEach((t, c) => {
-        if (t) newTiles.push({ ...t, row: r, col: c })
-      })
+      final.forEach((t, c) => { if (t) newTiles.push({ ...t, row: r, col: c }) })
     }
   } else {
     for (let c = 0; c < 4; c++) {
@@ -65,9 +65,7 @@ function moveTiles(tiles: Tile[], direction: Direction): { tiles: Tile[], score:
       totalScore += score
       while (slid.length < 4) slid.push(null as any)
       const final = direction === 'up' ? slid : [...slid].reverse()
-      final.forEach((t, r) => {
-        if (t) newTiles.push({ ...t, row: r, col: c })
-      })
+      final.forEach((t, r) => { if (t) newTiles.push({ ...t, row: r, col: c }) })
     }
   }
 
@@ -86,31 +84,54 @@ function hasMoves(tiles: Tile[]): boolean {
   return false
 }
 
-const INITIAL_STATE: GameState = {
-  board: [],
-  tiles: [],
-  score: 0,
-  bestScore: 0,
-  status: 'idle'
+function saveState(state: GameState) {
+  try {
+    // Ulož jen pokud hra probíhá — nemá smysl ukládat won/lost
+    if (state.status === 'playing') {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        tiles: state.tiles,
+        score: state.score,
+        status: state.status,
+      }))
+    } else {
+      localStorage.removeItem(SAVE_KEY)
+    }
+    localStorage.setItem(BEST_KEY, String(state.bestScore))
+  } catch { /* noop */ }
+}
+
+function loadState(): GameState {
+  const bestScore = parseInt(localStorage.getItem(BEST_KEY) ?? '0') || 0
+  try {
+    const raw = localStorage.getItem(SAVE_KEY)
+    if (raw) {
+      const saved = JSON.parse(raw)
+      if (saved.tiles?.length && saved.status === 'playing') {
+        return { board: [], tiles: saved.tiles, score: saved.score, bestScore, status: 'playing' }
+      }
+    }
+  } catch { /* noop */ }
+  // Žádná uložená hra — začni novou
+  let tiles: Tile[] = []
+  tiles = addRandomTile(tiles)
+  tiles = addRandomTile(tiles)
+  return { board: [], tiles, score: 0, bestScore, status: 'playing' }
 }
 
 export function useGameLogic() {
-  const [gameState, setGameState] = useState<GameState>(() => {
-    const saved = localStorage.getItem('2048-best')
-    const bestScore = saved ? parseInt(saved) : 0
-    return { ...INITIAL_STATE, bestScore }
-  })
+  const [gameState, setGameState] = useState<GameState>(loadState)
+
+  // Ulož stav při každé změně
+  useEffect(() => { saveState(gameState) }, [gameState])
 
   const newGame = useCallback(() => {
     setGameState(prev => {
       let tiles: Tile[] = []
       tiles = addRandomTile(tiles)
       tiles = addRandomTile(tiles)
-      return { ...INITIAL_STATE, tiles, bestScore: prev.bestScore, status: 'playing' }
+      return { board: [], tiles, score: 0, bestScore: prev.bestScore, status: 'playing' }
     })
   }, [])
-
-  useEffect(() => { newGame() }, [])
 
   const move = useCallback((direction: Direction) => {
     setGameState(prev => {
@@ -127,7 +148,6 @@ export function useGameLogic() {
       const withNew = addRandomTile(moved)
       const newScore = prev.score + gained
       const bestScore = Math.max(prev.bestScore, newScore)
-      localStorage.setItem('2048-best', String(bestScore))
 
       const hasWon = withNew.some(t => t.value >= 2048)
       const status = hasWon ? 'won' : !hasMoves(withNew) ? 'lost' : 'playing'
