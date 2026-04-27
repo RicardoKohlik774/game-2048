@@ -8,3 +8,13 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+// Registrace Service Workeru pro PWA (funguje jen na HTTPS nebo localhost)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => console.log('[SW] Registrován:', reg.scope))
+      .catch((err) => console.warn('[SW] Registrace selhala:', err))
+  })
+}
